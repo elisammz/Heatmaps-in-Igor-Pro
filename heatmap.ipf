@@ -1,26 +1,25 @@
 
 
-//call the ext or ret folder e.g. "Separate_F_D_Ext"
-//always change in preheatmaps too!
-//new_folder is the folder with the calculated heatmaps with the suffix"_Hist"
 
-Function heatmaps(new_folder)
+//new_folder is the folder in where the heatmaps will be stored 
+
+Function heatmaps("new_folder")
 	String new_folder
 	string thewave,wave_name, myHiststr, thewave2, wave_name2, thewave3, wave_name3
 	variable i, j, y_min, y_max, x_min, x_max
+
+
 	
+	Pre_heatmp("myDataFolder", "myNewDataFolder", min_value, max_value) //this function eliminates outliers. It removes the points outside the 
+	//the indicated range (min_value to max_value) and will store the new data without outliers in myNewDataFolder so, the raw data is conserved within the original folder
 	
-	//kill_data_points("Separate_F_D_Ret", "OffsetAxis_Hist_Ret") 	//ALWAYS MODIFY HERE, it removes the first 3 columns and it only leaves force and sepa columns
-	
-	
-	Pre_heatmp("Ret_folder", "no_outliers", -0.2e-9, 6e-9) //define max and min values to find outliers
 	 
-	Folder_Maker(new_folder)
+	Folder_Maker("new_folder")
 	 
  	DFREF path = GetDataFolderDFR()	//path = root
  	
  	cd new_folder
-	DFREF new_path = GetDataFolderDFR() //new_path is heatmaps
+	DFREF new_path = GetDataFolderDFR() //new_path is path for new_folder
 	
 	cd path
 	
@@ -28,7 +27,7 @@ Function heatmaps(new_folder)
 		 
 	cd root:no_outliers
 	
-	//creates the histograms in new_folder
+	//the histograms will be created and stored in new_folder
 	i = 0
 	j = 0
 	
@@ -43,15 +42,13 @@ Function heatmaps(new_folder)
 		endif			
 		
 		cd new_path
-		make/o/n = (65,20) myHist		
+		make/o/n = (65,20) myHist	//number of　bins in vertical and horizontal axis, 65x20 bins in this line	
 		
 		cd path
 		cd new_folder
-	
-	//in new_folder, finds the min and max values to set axis scales for heatmaps
-	
-		thewave2 = wavelist ("*Force",";","")
-		thewave3 = wavelist ("*Sep",";","")
+		
+		thewave2 = wavelist ("*",";","")
+		thewave3 = wavelist ("*",";","")
 		 
 		wave_name2 = stringfromlist (j, thewave2)
 		wave_name3 = stringfromlist (j, thewave3)
@@ -70,12 +67,12 @@ Function heatmaps(new_folder)
 			
 		print "x-scale: ", x_min, x_max
 	
-		setscale y, 0, 350e-12, myHist //ADJUST FORCE LIMIT AS REQUIRED
-		setscale x, -2e-10, 6.4e-9, myHist
+		setscale y, 0, 350e-12, myHist	//here limit for y can be assigned
+		setscale x, min_value, max_value myHist	//here limit for y and x axis can be adjusted according to your min_value and max_value
 		
 		JointHistogram(newwave3, newwave2, myHist)
 		
-		myHiststr = wave_name + "_Hist"
+		myHiststr = wave_name + "_Hist" //suffix of the heatmaps is "Hist"
 		
 		Duplicate/O myHist, new_path:$myHiststr
 		
